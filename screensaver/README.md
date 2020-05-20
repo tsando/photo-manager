@@ -1,0 +1,86 @@
+# Screensaver in Rasberry Pi
+
+## Photo Rendering Applications
+
+### Online photos - DAKboard
+
+This is easy to setup as per instructions here: https://blog.dakboard.com/diy-wall-display/
+but it only renders photos which are available online e.g. Apple Photos, Dropbox, etc.
+Hence, this wasn't useful when rendering photos stored in the RPi.
+
+
+### Offline photos
+
+Followed instructions here https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi
+
+First I ran `raspi-config`to configure some system options. Once in the configuration tool:
+Go to `Boot Options > Desktop Autologin Desktop GUI` and press `Enter`.
+
+The install this lightweight slideshow app https://github.com/NautiluX/slide/releases/tag/v0.9.0
+
+```
+wget https://github.com/NautiluX/slide/releases/download/v0.9.0/slide_pi_stretch_0.9.0.tar.gz
+tar xf slide_pi_stretch_0.9.0.tar.gz
+mv slide_0.9.0/slide /usr/local/bin/
+```
+
+Install the dependencies:
+
+```
+sudo apt install libexif12 qt5-default
+```
+
+Test run:
+
+```
+DISPLAY:=0  # set the DISPLAY variable to start the slideshow on the display attached to the Raspberry Pi
+slide -p -t 60 -o 200 -p /home/pi/screensaver/photos/
+```
+Then, force the screen to stay on by editing this file:
+
+```
+sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+```
+
+and add 
+
+```
+lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@xscreensaver -no-splash
+
+# added for screenserver app
+@xset s noblank
+@xset s off
+@xset -dpms
+@slide -p -t 60 -o 200 -p /home/pi/screensaver/photos/
+```
+
+## Running the python script
+
+### Python 3.7 environment
+
+Ideally we want to install `python 3.7`, which is the latest stable release.
+I tried to do this using `conda` by following this instructions
+https://stackoverflow.com/questions/39371772/how-to-install-anaconda-on-raspberry-pi-3-model-b
+but this only allows to install up to `python 3.6`. Since my code was in `python 3.7`, I didn't use this in the end.
+Instead, I ran the code using the pre-installed `python 3.7` in the RPi OS Raspbian:
+
+```
+/usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py
+```
+
+
+# Cron job
+
+I then set the job to run every 5 minutes via `crontab` and output the logging messages to a log file:
+
+```
+*/5 * * * * /usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py 2>/tmp/stdout_screensaver.log
+```
+
+
+# Other references
+
+- https://www.cnet.com/how-to/turn-an-old-monitor-into-a-wall-display-with-a-raspberry-pi/
+- https://pimylifeup.com/raspberry-pi-photo-frame/
