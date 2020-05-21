@@ -14,7 +14,7 @@ INPUT_PATH = os.getenv('SCREENSAVER_INPUT_PATH')
 OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 
 
-def get_photo_dirs_list_from_paulito() -> list:
+def get_photo_dirs_list() -> list:
     """
     Get list of directories containing photos from a remote server, whilst filtering some stuff
     using rsync command
@@ -53,7 +53,7 @@ def get_photo_dirs_list_from_paulito() -> list:
     return photo_dirs_list
 
 
-def delete_old_photos() -> None:
+def delete_old_screensaver_photos() -> None:
     """
     Delete old photo files if the screensaver directory exists (using subprocess)
     :return: None
@@ -71,19 +71,19 @@ def delete_old_photos() -> None:
     pass
 
 
-def copy_photos_dir_from_paulito_to_local(photo_dirs_list: list) -> None:
+def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
     """
     Select a random directory from INPUT_PATH and copy this locally to be
     picked up by the screensaver program
     :param photo_dirs_list: a list of directory names inside paulito's photo directory
-                            the output from running  get_photo_dirs_list_from_paulito
+                            the output from running  get_photo_dirs_list
     :return: None
     """
     app_logger.info(f'Selecting a random choice from directory list')
     random_dir_choice = np.random.choice(photo_dirs_list)
     app_logger.info(f'Copying **{random_dir_choice}** locally to {OUTPUT_PATH}')
 
-    delete_old_photos()
+    delete_old_screensaver_photos()
 
     # Now run rsync
     proc = subprocess.run(["rsync",
@@ -107,15 +107,15 @@ def copy_photos_dir_from_paulito_to_local(photo_dirs_list: list) -> None:
 
     # Repeat operation while no photos exist in the randomly selected directory
     if not ('.jpg' in proc.stdout or '.jpeg' in proc.stdout):
-        copy_photos_dir_from_paulito_to_local(photo_dirs_list)
+        upload_new_screensaver_photos(photo_dirs_list)
     pass
 
 
 def main() -> None:
     app_logger.info('Getting photo directories list from paulito')
-    photo_dirs_list = get_photo_dirs_list_from_paulito()
-    app_logger.info('Starting copy_photos_dir_from_paulito_to_local')
-    copy_photos_dir_from_paulito_to_local(photo_dirs_list)
+    photo_dirs_list = get_photo_dirs_list()
+    app_logger.info('Starting upload_new_screensaver_photos')
+    upload_new_screensaver_photos(photo_dirs_list)
     app_logger.info('Finished running screensaver.py!')
     pass
 
