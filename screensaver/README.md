@@ -1,15 +1,41 @@
 # Screensaver in Rasberry Pi
 
-## Photo Rendering Applications
+Given a list of directories containing photos of different trips or themese,
+this script allows you to randomly select one and upload to a location from which a 
+screensaver app reads input, e.g. your laptop or a Raspberry Pi
 
-### Online photos - DAKboard
+# Usage
+
+The script `screensaver.py` requires `python 3.7` and setting 2 environment variables:
+`SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located) and
+`SCREENSAVER_OUTPUT_PATH` (the path to where the screensaver app reads from).
+ Then, you can run as:
+ 
+ ```
+/usr/bin/python3.7 /home/pi/screensaver/screensaver.py
+```
+
+## Cron job
+
+I then set the job to run every 5 minutes via `crontab` and output the logging messages to a log file:
+
+```
+*/5 * * * * /usr/bin/python3.7 /home/pi/screensaver/screensaver.py 2>/tmp/stdout_screensaver.log
+```
+
+
+# Photo Rendering (Screensaver) Applications for Raspberry Pi
+
+You can view your photos via a photo rendering application. I found the following 2 options: 
+
+## Online photos - DAKboard
 
 This is easy to setup as per instructions here: https://blog.dakboard.com/diy-wall-display/
 but it only renders photos which are available online e.g. Apple Photos, Dropbox, etc.
 Hence, this wasn't useful when rendering photos stored in the RPi.
 
 
-### Offline photos
+## Offline photos
 
 Followed instructions here https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi
 
@@ -68,15 +94,6 @@ Instead, I ran the code using the pre-installed `python 3.7` in the RPi OS Raspb
 
 ```
 /usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py
-```
-
-
-# Cron job
-
-I then set the job to run every 5 minutes via `crontab` and output the logging messages to a log file:
-
-```
-*/5 * * * * /usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py 2>/tmp/stdout_screensaver.log
 ```
 
 
