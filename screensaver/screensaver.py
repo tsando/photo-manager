@@ -93,7 +93,9 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            "-r",
                            # include files:
                            "--include", "*.jpg",
+                           "--include", "*.JPG",
                            "--include", "*.jpeg",
+                           "--include", "*.JPEG",
                            # exclude files:
                            "--exclude", "*",
                            # from:
@@ -105,8 +107,11 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                           # stderr=subprocess.STDOUT
                           )
 
+    # Lower case output to handle cases when file extension is in caps
+    proc_stdout_lower_case = proc.stdout.lower()
+
     # Repeat operation while no photos exist in the randomly selected directory
-    if not ('.jpg' in proc.stdout or '.jpeg' in proc.stdout):
+    if not ('.jpg' in proc_stdout_lower_case or '.jpeg' in proc_stdout_lower_case):
         upload_new_screensaver_photos(photo_dirs_list)
     pass
 
