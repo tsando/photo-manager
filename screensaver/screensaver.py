@@ -102,10 +102,13 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            f"{INPUT_PATH}'{random_dir_choice}'",
                            # to:
                            OUTPUT_PATH],
-                          stdout=subprocess.PIPE,
+                          stdout=subprocess.PIPE,  # required to return names of photos transferred
                           universal_newlines=True  # required to return string, not bytes-like obj
                           # stderr=subprocess.STDOUT
                           )
+
+    # Change mode of newly created directory so photos can be deleted when job runs
+    subprocess.run(["chmod", "777", OUTPUT_PATH])
 
     # Lower case output to handle cases when file extension is in caps
     proc_stdout_lower_case = proc.stdout.lower()
