@@ -21,35 +21,34 @@ def get_photo_dirs_list() -> list:
     :return: list with directory names
     """
     # Ref: https://stackoverflow.com/questions/14272582/calling-rsync-from-python-subprocess-call
-    proc = subprocess.Popen(["rsync",
-                             # verbose + dry-run
-                             "-vn",
-                             # archive
-                             "-a",
-                             # include directories"
-                             "--include", "*/",
-                             # exclude files:
-                             "--exclude", "*",
-                             # from:
-                             INPUT_PATH,
-                             # to:
-                             OUTPUT_PATH
-                             ],
-                            stdout=subprocess.PIPE,
-                            universal_newlines=True)
+    proc = subprocess.run(["rsync",
+                           # verbose + dry-run
+                           "-vn",
+                           # archive
+                           "-a",
+                           # include directories"
+                           "--include", "*/",
+                           # exclude files:
+                           "--exclude", "*",
+                           # from:
+                           INPUT_PATH,
+                           # to:
+                           OUTPUT_PATH
+                           ],
+                          # universal_newlines=True,  # This throws utf-8 error for some dirs
+                          stdout=subprocess.PIPE)
 
     photo_dirs_list = []
 
-    while True:
-        line = proc.stdout.readline()
-        if not line:
-            break
+    # Convert bytes to string as no longer using universal_newlines
+    lines = ''.join(map(chr, proc.stdout)).split('\n')
+
+    for line in lines:
         # Filter all thumbnails files and anything else that doesn't start with year 2000 and is
         # not within a subdir
         if '@eaDir' in line or not line.startswith('20') or line.count('/') < 2:
             continue
         photo_dirs_list.append(line.rstrip())
-    #     print(line.rstrip())
     return photo_dirs_list
 
 
