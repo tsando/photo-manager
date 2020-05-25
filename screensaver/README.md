@@ -1,23 +1,35 @@
 # Screensaver in Rasberry Pi
 
-Given a list of directories containing photos of different trips or themese,
+Given a list of directories containing photos of different trips or themes,
 this script allows you to randomly select one and upload to a location from which a 
-screensaver app reads input, e.g. your laptop or a Raspberry Pi
+photo rendering app reads from, e.g. your laptop's screensaver application or 
+a similar one in a Raspberry Pi
 
 # Usage
 
 The script `screensaver.py` requires `python 3.7` and setting 2 environment variables:
 `SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located) and
-`SCREENSAVER_OUTPUT_PATH` (the path to where the screensaver app reads from).
+`SCREENSAVER_OUTPUT_PATH` (the path to where to upload the photos so the photo rendering app can read from).
  Then, you can run as:
  
  ```
-/usr/bin/python3.7 /home/pi/screensaver/screensaver.py
+/usr/bin/python3.7 /home/pi/code/photo-manager/screensaver/screensaver.py
+```
+
+Alternatively you can have a bash script `run_screensaver.sh` with the following:
+
+```
+#!/bin/bash
+
+export SCREENSAVER_INPUT_PATH=XXX 
+export SCREENSAVER_OUTPUT_PATH=XXX
+
+/usr/bin/python3.7 /home/pi/code/photo-manager/screensaver/screensaver.py
 ```
 
 ## Cron job
 
-I then set the job to run every 5 minutes via `crontab` and output the logging messages to a log file:
+I set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and output the logging messages to a log file:
 
 ```
 */5 * * * * /usr/bin/python3.7 /home/pi/screensaver/screensaver.py 2>/tmp/stdout_screensaver.log
