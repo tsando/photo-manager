@@ -71,10 +71,10 @@ sudo apt install libexif12 qt5-default
 Test run:
 
 ```
-DISPLAY:=0  # set the DISPLAY variable to start the slideshow on the display attached to the Raspberry Pi
-slide -p -t 60 -o 200 -p /home/pi/screensaver/photos/
+export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the Raspberry Pi
+slide -p -t 60 -o 200 -p /home/pi/code/photo-manager/screensaver/photos/
 ```
-Then, force the screen to stay on by editing this file:
+Then, kill this process and now force the screen to stay on and run the slide app automatically by editing this file:
 
 ```
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
@@ -91,8 +91,9 @@ lxpanel --profile LXDE-pi
 @xset s noblank
 @xset s off
 @xset -dpms
-@slide -p -t 60 -o 200 -p /home/pi/screensaver/photos/
+@slide -p -t 60 -o 200 -p /home/pi/code/photo-manager/screensaver/photos/
 ```
+
 
 ## Running the python script
 
@@ -108,6 +109,54 @@ Instead, I ran the code using the pre-installed `python 3.7` in the RPi OS Raspb
 /usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py
 ```
 
+# Errors
+
+## Display error
+
+```
+No protocol specified
+qt.qpa.screen: QXcbConnection: Could not connect to display :0
+Could not connect to any X display.
+```
+Solve this by exporting the display variable:
+
+```
+export DISPLAY=:0 
+```
+
+## Floating point exception
+
+```
+libEGL warning: DRI2: failed to authenticate
+Floating point exception
+```
+Solve by [building from scratch](https://github.com/NautiluX/slide#build) this commit from the `slide` app: 
+https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf
+
+```
+sudo apt install libexif-dev
+mkdir -p make
+cd make
+qmake ../src/slide.pro
+make
+sudo make install
+```
+
+References:
+- https://github.com/NautiluX/slide/issues/6
+- https://github.com/NautiluX/slide/issues/4
+- https://github.com/NautiluX/slide#build
+
+## TV switching back to RPi source
+ 
+This was what I had to do to deactivate the HDMI-CEC commands on the rpi.
+Added the following lines to my /boot/config.txt  :
+
+```
+hdmi_ignore_cec_init=1
+hdmi_ignore_cec=1
+```
+More info here:  https://elinux.org/RPiconfig
 
 # Other references
 
