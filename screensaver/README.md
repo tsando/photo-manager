@@ -158,6 +158,8 @@ hdmi_ignore_cec=1
 ```
 More info here:  https://elinux.org/RPiconfig
 
+Recommended hardware: 
+
 # Other references
 
 - https://www.cnet.com/how-to/turn-an-old-monitor-into-a-wall-display-with-a-raspberry-pi/
