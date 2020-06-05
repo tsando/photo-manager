@@ -158,7 +158,7 @@ hdmi_ignore_cec=1
 ```
 More info here:  https://elinux.org/RPiconfig
 
-Recommended hardware: 
+Recommended hardware: Link
 
 # Other references
 
