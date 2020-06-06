@@ -12,6 +12,7 @@ app_logger = logging.getLogger('screensaver.py')
 # Set global variables from env variables
 INPUT_PATH = os.getenv('SCREENSAVER_INPUT_PATH')
 OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
+RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
 
 def get_photo_dirs_list() -> list:
@@ -26,6 +27,8 @@ def get_photo_dirs_list() -> list:
                            "-vn",
                            # archive
                            "-a",
+                           # use special port
+                           "-e 'ssh -p " + RSYNC_PORT + "'",
                            # include directories"
                            "--include", "*/",
                            # exclude files:
@@ -90,6 +93,8 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            "-v",
                            # recursive
                            "-r",
+                           # use special port
+                           "-e 'ssh -p " + RSYNC_PORT + "'",
                            # include files:
                            "--include", "*.jpg",
                            "--include", "*.JPG",
