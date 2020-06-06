@@ -28,7 +28,7 @@ def get_photo_dirs_list() -> list:
                            # archive
                            "-a",
                            # use special port
-                           "-e 'ssh -p " + RSYNC_PORT + "'",
+                           "--rsh", "ssh -p" + RSYNC_PORT,
                            # include directories"
                            "--include", "*/",
                            # exclude files:
@@ -94,7 +94,7 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            # recursive
                            "-r",
                            # use special port
-                           "-e 'ssh -p " + RSYNC_PORT + "'",
+                           "--rsh", "ssh -p" + RSYNC_PORT,
                            # include files:
                            "--include", "*.jpg",
                            "--include", "*.JPG",
