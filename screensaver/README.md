@@ -156,9 +156,12 @@ Added the following lines to my /boot/config.txt  :
 hdmi_ignore_cec_init=1
 hdmi_ignore_cec=1
 ```
-More info here:  https://elinux.org/RPiconfig
 
-Recommended hardware: Link
+
+More info [here](https://elinux.org/RPiconfig). This might not work perfectly, and a TV can still get confused. 
+In that case following hardware is required:
+[HDMI CEC Less Adapter](https://www.amazon.co.uk/LINDY-HDMI-Less-Adapter-Female-Black/dp/B00DL48KVI). 
+This will terminate pin 13 of the HDMI cable, which is responsible for the CEC signal.
 
 # Other references
 
