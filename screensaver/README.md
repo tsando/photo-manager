@@ -7,9 +7,10 @@ a similar one in a Raspberry Pi
 
 # Usage
 
-The script `screensaver.py` requires `python 3.7` and setting 2 environment variables:
-`SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located) and
-`SCREENSAVER_OUTPUT_PATH` (the path to where to upload the photos so the photo rendering app can read from).
+The script `screensaver.py` requires `python 3.7` and setting 3 environment variables:
+`SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located), `SCREENSAVER_OUTPUT_PATH` 
+(the path to where to upload the photos so the photo rendering app can read from), and `SCREENSAVER_RSYNC_PORT` 
+(the port over which ssh is being used, usually 22).
  Then, you can run as:
  
  ```
@@ -23,6 +24,7 @@ Alternatively you can have a bash script `run_screensaver.sh` with the following
 
 export SCREENSAVER_INPUT_PATH=XXX 
 export SCREENSAVER_OUTPUT_PATH=XXX
+export SCREENSAVER_RSYNC_PORT=XXX
 
 /usr/bin/python3.7 /home/pi/code/photo-manager/screensaver/screensaver.py
 ```
