@@ -41,18 +41,27 @@ def get_photo_dirs_list() -> list:
                           # universal_newlines=True,  # This throws utf-8 error for some dirs
                           stdout=subprocess.PIPE)
 
-    photo_dirs_list = []
-
     # Convert bytes to string as no longer using universal_newlines
     lines = ''.join(map(chr, proc.stdout)).split('\n')
 
+    # Filter all thumbnails, bin-content, non-directories, etc.
+    photo_dirs_list = []
     for line in lines:
-        # Filter all thumbnails files and anything else that doesn't start with year 2000 and is
-        # not within a subdir
-        if '@eaDir' in line or not line.startswith('20') or line.count('/') < 2:
+        if '@eaDir' in line or '#recycle' in line or 'bytes/sec' in line or './' in line or '/' not in line:
             continue
         photo_dirs_list.append(line.rstrip())
-    return photo_dirs_list
+
+    # Only select the last level of subdirectories, and ignore any higher level directories
+    photo_dirs_list_final = []
+    for line in photo_dirs_list:
+        counter = 0
+        for line2 in photo_dirs_list:
+            if line in line2:
+                counter += 1
+        if counter == 1:
+            photo_dirs_list_final.append(line.rstrip())
+
+    return photo_dirs_list_final
 
 
 def delete_old_screensaver_photos() -> None:
