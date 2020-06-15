@@ -99,6 +99,7 @@ lxpanel --profile LXDE-pi
 @slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 
+The option `-t 60` determines how frequent the slideshow changes photos in seconds. Feel free to adjust. 
 
 ## Running the python script
 
