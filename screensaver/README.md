@@ -7,14 +7,16 @@ a similar one in a Raspberry Pi
 
 # Usage
 
-The script `screensaver.py` requires `python 3.7` and setting 3 environment variables:
-`SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located), `SCREENSAVER_OUTPUT_PATH` 
-(the path to where to upload the photos so the photo rendering app can read from), and `SCREENSAVER_RSYNC_PORT` 
-(the port over which ssh is being used, usually 22).
- Then, you can run as:
+The script `screensaver.py` requires `python 3.7` with `numpy` and setting 3 environment variables:
+
+1. `SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located)
+2. `SCREENSAVER_OUTPUT_PATH` (the path to where to upload the photos so the photo rendering app can read from)
+3. `SCREENSAVER_RSYNC_PORT` (the port over which ssh is being used, usually 22)
+
+Then, you can run it with:
  
  ```
-/usr/bin/python3.7 /home/pi/code/photo-manager/screensaver/screensaver.py
+/usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
 
 Alternatively you can have a bash script `run_screensaver.sh` with the following:
@@ -22,21 +24,22 @@ Alternatively you can have a bash script `run_screensaver.sh` with the following
 ```
 #!/bin/bash
 
-export SCREENSAVER_INPUT_PATH=XXX 
-export SCREENSAVER_OUTPUT_PATH=XXX
-export SCREENSAVER_RSYNC_PORT=XXX
+export SCREENSAVER_INPUT_PATH="XXX" 
+export SCREENSAVER_OUTPUT_PATH="XXX"
+export SCREENSAVER_RSYNC_PORT="XXX"
 
-/usr/bin/python3.7 /home/pi/code/photo-manager/screensaver/screensaver.py
+/usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
 
 ## Cron job
 
-I set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and output the logging messages to a log file:
+You can set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and output the logging messages to a log file:
 
 ```
-*/5 * * * * /usr/bin/python3.7 /home/pi/screensaver/screensaver.py 2>/tmp/stdout_screensaver.log
+*/5 * * * * /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log
 ```
 
+Don't forget to make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
 
 # Photo Rendering (Screensaver) Applications for Raspberry Pi
 
@@ -44,25 +47,26 @@ You can view your photos via a photo rendering application. I found the followin
 
 ## Online photos - DAKboard
 
-This is easy to setup as per instructions here: https://blog.dakboard.com/diy-wall-display/
+This is easy to setup as per instructions [here](https://blog.dakboard.com/diy-wall-display/)
 but it only renders photos which are available online e.g. Apple Photos, Dropbox, etc.
 Hence, this wasn't useful when rendering photos stored in the RPi.
 
 
 ## Offline photos
 
-Followed instructions here https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi
+Based on [these](https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi) instructions. 
 
-First I ran `raspi-config`to configure some system options. Once in the configuration tool:
-Go to `Boot Options > Desktop Autologin Desktop GUI` and press `Enter`.
+First run `sudo raspi-config`to configure some system options. In the configuration tool:
+Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm.
 
-The install this lightweight slideshow app https://github.com/NautiluX/slide/releases/tag/v0.9.0
+Then install this lightweight slideshow [app](https://github.com/NautiluX/slide/releases/tag/v0.9.0) with:
 
 ```
 wget https://github.com/NautiluX/slide/releases/download/v0.9.0/slide_pi_stretch_0.9.0.tar.gz
 tar xf slide_pi_stretch_0.9.0.tar.gz
 mv slide_0.9.0/slide /usr/local/bin/
 ```
+(You can then remove the tar-file)
 
 Install the dependencies:
 
@@ -70,11 +74,11 @@ Install the dependencies:
 sudo apt install libexif12 qt5-default
 ```
 
-Test run:
+Test run (make sure the folder `screensaver/photos` exists, if not make one using `mkdir photos` in the `screensaver` directory):
 
 ```
 export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the Raspberry Pi
-slide -p -t 60 -o 200 -p /home/pi/code/photo-manager/screensaver/photos/
+slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 Then, kill this process and now force the screen to stay on and run the slide app automatically by editing this file:
 
@@ -93,22 +97,22 @@ lxpanel --profile LXDE-pi
 @xset s noblank
 @xset s off
 @xset -dpms
-@slide -p -t 60 -o 200 -p /home/pi/code/photo-manager/screensaver/photos/
+@slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 
+The option `-t 60` determines how frequent the slideshow changes photos in seconds. Feel free to adjust. 
 
 ## Running the python script
 
 ### Python 3.7 environment
 
 Ideally we want to install `python 3.7`, which is the latest stable release.
-I tried to do this using `conda` by following this instructions
-https://stackoverflow.com/questions/39371772/how-to-install-anaconda-on-raspberry-pi-3-model-b
-but this only allows to install up to `python 3.6`. Since my code was in `python 3.7`, I didn't use this in the end.
+I tried to do this using `conda` by following [these instructions](https://stackoverflow.com/questions/39371772/how-to-install-anaconda-on-raspberry-pi-3-model-b), 
+but this only allows to install up to `python 3.6`. Since my code was in `python 3.7`, I did not use this in the end.
 Instead, I ran the code using the pre-installed `python 3.7` in the RPi OS Raspbian:
 
 ```
-/usr/bin/python3.7 /home/pi/screensaver/screensaver_rpi.py
+/usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
 
 # Errors
@@ -132,8 +136,8 @@ export DISPLAY=:0
 libEGL warning: DRI2: failed to authenticate
 Floating point exception
 ```
-Solve by [building from scratch](https://github.com/NautiluX/slide#build) this commit from the `slide` app: 
-https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf
+Solve by [building from scratch](https://github.com/NautiluX/slide#build) this commit from the `slide` [app]
+(https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf):
 
 ```
 sudo apt install libexif-dev
