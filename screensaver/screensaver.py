@@ -47,11 +47,20 @@ def get_photo_dirs_list() -> list:
     # Filter all thumbnails, bin-content, non-directories, etc.
     photo_dirs_list = []
     for line in lines:
-        if '@eaDir' in line or '#recycle' in line or 'bytes/sec' in line or './' in line or '/' not in line:
+        if '@eaDir' in line or '#recycle' in line or 'bytes/sec' in line or './' in line or 'created directory' in line:
+            continue
+        if '/' not in line:
             continue
         photo_dirs_list.append(line.rstrip())
 
-    # Only select the last level of subdirectories, and ignore any higher level directories
+    return get_last_level_directories(photo_dirs_list)
+
+
+def get_last_level_directories(photo_dirs_list) -> list:
+    """
+    Only select the last level of subdirectories, and ignore any higher level directories
+    :return: list with directory names
+    """
     photo_dirs_list_final = []
     for line in photo_dirs_list:
         counter = 0
@@ -60,7 +69,6 @@ def get_photo_dirs_list() -> list:
                 counter += 1
         if counter == 1:
             photo_dirs_list_final.append(line.rstrip())
-
     return photo_dirs_list_final
 
 
