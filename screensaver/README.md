@@ -58,7 +58,7 @@ Hence, this wasn't useful when rendering photos stored in the RPi.
 Based on [these](https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi) instructions. 
 
 First run `sudo raspi-config`to configure some system options. In the configuration tool:
-Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm.
+Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm. This might require rebooting the Rpi.
 
 Then install this lightweight slideshow [app](https://github.com/NautiluX/slide/releases/tag/v0.9.0) with:
 
