@@ -65,7 +65,7 @@ Then install this lightweight slideshow [app](https://github.com/NautiluX/slide/
 ```
 wget https://github.com/NautiluX/slide/releases/download/v0.9.0/slide_pi_stretch_0.9.0.tar.gz
 tar xf slide_pi_stretch_0.9.0.tar.gz
-mv slide_0.9.0/slide /usr/local/bin/
+sudo mv slide_0.9.0/slide /usr/local/bin/  # can remove now that it is installed
 ```
 (You can then remove the tar-file)
 
