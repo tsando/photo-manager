@@ -30,6 +30,7 @@ export SCREENSAVER_RSYNC_PORT="XXX"
 
 /usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
+Don't forget to make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
 
 ## Cron job
 
@@ -39,7 +40,7 @@ You can set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and out
 */5 * * * * /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log
 ```
 
-Don't forget to make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
+
 
 # Photo Rendering (Screensaver) Applications for Raspberry Pi
 
