@@ -10,7 +10,7 @@ a similar one in a RPi
 The script `screensaver.py` requires `python 3.7` with `numpy` and setting 3 environment variables:
 
 1. `SCREENSAVER_INPUT_PATH` (The path to where the photos directories are located. Needs to end with `/`!)
-2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Should not end with `/`.)
+2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Should not end with `/`)
 3. `SCREENSAVER_RSYNC_PORT` (The port over which ssh is being used, usually 22)
 
 Then, you can run it with:
@@ -45,6 +45,7 @@ Alternatively, you can set `run_screensaver.sh` to run every time the RPi boots 
 ```
 @reboot /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log &
 ```
+(Important is the '&' at the end of the line to not slow down the overall boot process too much as it now will be executed in parallel)
 
 
 # Photo Rendering (Screensaver) Applications for Raspberry Pi
