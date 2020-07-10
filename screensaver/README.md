@@ -9,9 +9,9 @@ a similar one in a Raspberry Pi
 
 The script `screensaver.py` requires `python 3.7` with `numpy` and setting 3 environment variables:
 
-1. `SCREENSAVER_INPUT_PATH` (the path to where the photos directories are located)
-2. `SCREENSAVER_OUTPUT_PATH` (the path to where to upload the photos so the photo rendering app can read from)
-3. `SCREENSAVER_RSYNC_PORT` (the port over which ssh is being used, usually 22)
+1. `SCREENSAVER_INPUT_PATH` (The path to where the photos directories are located. Needs to end with `/`!)
+2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Should not end with `/`.)
+3. `SCREENSAVER_RSYNC_PORT` (The port over which ssh is being used, usually 22)
 
 Then, you can run it with:
  
@@ -30,7 +30,7 @@ export SCREENSAVER_RSYNC_PORT="XXX"
 
 /usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
-Don't forget to make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
+Make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
 
 ## Cron job
 
@@ -39,7 +39,6 @@ You can set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and out
 ```
 */5 * * * * /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log
 ```
-
 
 
 # Photo Rendering (Screensaver) Applications for Raspberry Pi
@@ -60,19 +59,25 @@ Based on [these](https://opensource.com/article/19/2/wifi-picture-frame-raspberr
 First run `sudo raspi-config`to configure some system options. In the configuration tool:
 Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm. This might require rebooting the Rpi.
 
-Then install this lightweight slideshow [app](https://github.com/NautiluX/slide/releases/tag/v0.9.0) with:
-
-```
-wget https://github.com/NautiluX/slide/releases/download/v0.9.0/slide_pi_stretch_0.9.0.tar.gz
-tar xf slide_pi_stretch_0.9.0.tar.gz
-sudo mv slide_0.9.0/slide /usr/local/bin/  # can remove now that it is installed
-```
-(You can then remove the tar-file)
-
-Install the dependencies:
+Then install the lightweight slideshow app ['slide'](https://github.com/NautiluX/slide/releases/tag/v0.9.0). 
+First the the dependencies:
 
 ```
 sudo apt install libexif12 qt5-default
+sudo apt install libexif-dev
+```
+
+Then let's switch into the home directory, clone the latest version and build it:
+
+```
+cd
+git clone https://github.com/NautiluX/slide.git
+cd slide
+mkdir -p make
+cd make
+qmake ../src/slide.pro
+make
+sudo make install
 ```
 
 Test run (make sure the folder `screensaver/photos` exists, if not make one using `mkdir photos` in the `screensaver` directory):
@@ -137,17 +142,8 @@ export DISPLAY=:0
 libEGL warning: DRI2: failed to authenticate
 Floating point exception
 ```
-Solve by [building from scratch](https://github.com/NautiluX/slide#build) this commit from the `slide` [app]
-(https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf):
-
-```
-sudo apt install libexif-dev
-mkdir -p make
-cd make
-qmake ../src/slide.pro
-make
-sudo make install
-```
+Solve by [building from scratch](https://github.com/NautiluX/slide#build) this specific commit from the 'slide'
+[app](https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf)
 
 References:
 - https://github.com/NautiluX/slide/issues/6
@@ -156,14 +152,16 @@ References:
 
 ## TV switching back to RPi source
  
-This was what I had to do to deactivate the HDMI-CEC commands on the rpi.
-Added the following lines to my /boot/config.txt  :
+This was what I had to do to deactivate the HDMI-CEC commands on the Rpi:
+```
+sudo nano /boot/config.txt
+```
 
+Add the following lines to that file:
 ```
 hdmi_ignore_cec_init=1
 hdmi_ignore_cec=1
 ```
-
 
 More info [here](https://elinux.org/RPiconfig). This might not work perfectly, and a TV can still get confused. 
 In that case following hardware is required:
