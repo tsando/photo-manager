@@ -3,7 +3,7 @@
 Given a list of directories containing photos of different trips or themes,
 this script allows you to randomly select one and upload to a location from which a 
 photo rendering app reads from, e.g. your laptop's screensaver application or 
-a similar one in a Raspberry Pi
+a similar one in a RPi
 
 # Usage
 
@@ -40,6 +40,12 @@ You can set `run_screensaver.sh` to run every 5 minutes via `crontab -e` and out
 */5 * * * * /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log
 ```
 
+Alternatively, you can set `run_screensaver.sh` to run every time the RPi boots by adding:
+
+```
+@reboot /home/pi/photo-manager/screensaver/run_screensaver.sh 2>/tmp/stdout_screensaver.log &
+```
+
 
 # Photo Rendering (Screensaver) Applications for Raspberry Pi
 
@@ -57,17 +63,17 @@ Hence, this wasn't useful when rendering photos stored in the RPi.
 Based on [these](https://opensource.com/article/19/2/wifi-picture-frame-raspberry-pi) instructions. 
 
 First run `sudo raspi-config`to configure some system options. In the configuration tool:
-Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm. This might require rebooting the Rpi.
+Go to `Boot Options > B1 > B4 Desktop Autologin (Desktop GUI)` and confirm. This might require rebooting the RPi.
 
-Then install the lightweight slideshow app ['slide'](https://github.com/NautiluX/slide/releases/tag/v0.9.0). 
-First the the dependencies:
+Then install the lightweight app '[slide](https://github.com/NautiluX/slide/releases/tag/v0.9.0)'. 
+First the dependencies:
 
 ```
 sudo apt install libexif12 qt5-default
 sudo apt install libexif-dev
 ```
 
-Then let's switch into the home directory, clone the latest version and build it:
+Then switch into the home directory, clone the latest version and build it:
 
 ```
 cd
@@ -83,7 +89,7 @@ sudo make install
 Test run (make sure the folder `screensaver/photos` exists, if not make one using `mkdir photos` in the `screensaver` directory):
 
 ```
-export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the Raspberry Pi
+export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the RPi
 slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 Then, kill this process and now force the screen to stay on and run the slide app automatically by editing this file:
@@ -143,7 +149,7 @@ libEGL warning: DRI2: failed to authenticate
 Floating point exception
 ```
 Solve by [building from scratch](https://github.com/NautiluX/slide#build) this specific commit from the 'slide'
-[app](https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf)
+[app](https://github.com/NautiluX/slide/commit/09fc431034a9b0c3f7ce488a7a5d4fd34593afbf).
 
 References:
 - https://github.com/NautiluX/slide/issues/6
@@ -152,7 +158,7 @@ References:
 
 ## TV switching back to RPi source
  
-This was what I had to do to deactivate the HDMI-CEC commands on the Rpi:
+This was what I had to do to deactivate the HDMI-CEC commands on the RPi:
 ```
 sudo nano /boot/config.txt
 ```
