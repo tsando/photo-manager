@@ -87,7 +87,7 @@ make
 sudo make install
 ```
 
-Test run (make sure the folder `screensaver/photos` exists, if not make one using `mkdir photos` in the `screensaver` directory):
+Do a test run (in the following the path `/home/pi/photo-manager/screensaver/photos/` was created, and also used as `SCREENSAVER_OUTPUT_PATH`):
 
 ```
 export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the RPi
