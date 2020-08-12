@@ -110,6 +110,8 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            "-v",
                            # recursive
                            "-r",
+                           # protect arguments --protect-args equivalent
+                           "-s",
                            # use special port
                            "--rsh", "ssh -p" + RSYNC_PORT,
                            # include files:
