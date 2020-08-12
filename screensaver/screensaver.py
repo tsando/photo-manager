@@ -122,7 +122,7 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            # exclude files:
                            "--exclude", "*",
                            # from:
-                           f"{INPUT_PATH}'{random_dir_choice}'",
+                           f"{INPUT_PATH}{random_dir_choice}/",
                            # to:
                            OUTPUT_PATH],
                           stdout=subprocess.PIPE,  # required to return names of photos transferred
