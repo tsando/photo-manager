@@ -3,14 +3,14 @@
 Given a list of directories containing photos of different trips or themes,
 this script allows you to randomly select one and upload to a location from which a 
 photo rendering app reads from, e.g. your laptop's screensaver application or 
-a similar one in a RPi
+a similar one in an RPi.
 
 # Usage
 
 The script `screensaver.py` requires `python 3.7` with `numpy` and setting 3 environment variables:
 
-1. `SCREENSAVER_INPUT_PATH` (The path to where the photos directories are located. Needs to end with `/`!)
-2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Should not end with `/`)
+1. `SCREENSAVER_INPUT_PATH` (The path to where the photos directories are located. Should end with `/`)
+2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Shouldn't end with `/`)
 3. `SCREENSAVER_RSYNC_PORT` (The port over which ssh is being used, usually 22)
 
 Then, you can run it with:
