@@ -14,6 +14,12 @@ INPUT_PATH = os.getenv('SCREENSAVER_INPUT_PATH')
 OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
+# Global variable path validation
+if INPUT_PATH[-1] != '/':
+    INPUT_PATH += '/'
+if OUTPUT_PATH[-1] == '/':
+    OUTPUT_PATH = OUTPUT_PATH[:-1]
+
 
 def get_photo_dirs_list() -> list:
     """
