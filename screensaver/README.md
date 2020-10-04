@@ -31,6 +31,8 @@ export SCREENSAVER_RSYNC_PORT="XXX"
 /usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
 Make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
+Also ensure that you have a new version of `rsync` installed (at least 3.1.3). 
+Instructions for Mac (with Homebrew installed) are [here](https://bayton.org/2018/07/how-to-update-rsync-on-mac-os-high-sierra/).
 
 ## Cron job
 

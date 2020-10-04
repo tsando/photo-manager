@@ -106,7 +106,7 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
     """
     app_logger.info(f'Selecting a random choice from directory list')
     random_dir_choice = np.random.choice(photo_dirs_list)
-    app_logger.info(f'Copying **{random_dir_choice}** locally to {OUTPUT_PATH}')
+    app_logger.info(f'Copying {random_dir_choice} locally to {OUTPUT_PATH}')
 
     delete_old_screensaver_photos()
 
@@ -128,7 +128,7 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            # exclude files:
                            "--exclude", "*",
                            # from:
-                           f"{INPUT_PATH}{random_dir_choice}/",
+                           f"{INPUT_PATH}{random_dir_choice}",
                            # to:
                            OUTPUT_PATH],
                           stdout=subprocess.PIPE,  # required to return names of photos transferred
