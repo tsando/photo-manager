@@ -195,6 +195,10 @@ def main() -> None:
     print(strip_path(get_random_entry(local_list)))
     print(set(a).issubset(b))
 
+    size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'photos')]).split()[0].decode('utf-8'))
+    print("Mbytes photos:", size)
+    size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'library')]).split()[0].decode('utf-8'))
+    print("Mbytes photos:", size)
     ##
     pass
 
