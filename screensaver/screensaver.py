@@ -2,6 +2,7 @@
 
 import subprocess
 import os
+import pickle
 import logging
 import numpy as np
 
@@ -91,13 +92,23 @@ def delete_old_screensaver_photos() -> None:
     Delete old photo files if the screensaver directory exists (using subprocess)
     :return: None
     """
+    path_photos = os.path.join(OUTPUT_PATH, 'photos')
+    delete_directory(path_photos)
+    pass
+
+
+def delete_directory(path) -> None:
+    """
+    Deletes a directory if given path exists
+    :return: None
+    """
     # First, check it exists by checking the return code of below command
-    proc = subprocess.run(["test", "-e", os.path.join(OUTPUT_PATH, 'photos')],
+    proc = subprocess.run(["test", "-e", path],
                           # stdout=subprocess.PIPE,
                           stderr=subprocess.STDOUT
                           )
     if proc.returncode == 0:
-        subprocess.run(["rm", "-rf", os.path.join(OUTPUT_PATH, 'photos')],
+        subprocess.run(["rm", "-rf", path],
                        # stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT
                        )
@@ -175,6 +186,7 @@ def main() -> None:
     upload_new_screensaver_photos(remote_list)
     app_logger.info('Finished running screensaver.py!')
 
+
     ##
     #1 check if paulito can be reached. get dir_list. if all of dir_list in already_used, remove all from already_used list.
     #2 choose random directory
@@ -195,10 +207,16 @@ def main() -> None:
     print(strip_path(get_random_entry(local_list)))
     print(set(a).issubset(b))
 
+    #Size stuff
     size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'photos')]).split()[0].decode('utf-8'))
     print("Mbytes photos:", size)
     size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'library')]).split()[0].decode('utf-8'))
     print("Mbytes photos:", size)
+
+    #Pickle stuff
+    already_used = pickle.load(open("already_used.p", "rb"))
+    already_used.append('test')
+    pickle.dump(already_used, open("already_used.p", "wb"))
     ##
     pass
 
