@@ -22,7 +22,7 @@ if INPUT_PATH[-1] != '/':
 
 def get_remote_dirs_list() -> list:
     """
-    Get list of directories containing photos from a remote server, whilst filtering some stuff
+    Get list of directories containing photos from a remote location, whilst filtering some stuff
     using rsync command
     :return: list with directory names
     """
@@ -92,8 +92,8 @@ def delete_old_screensaver_photos() -> None:
     Delete old photo files if the screensaver directory exists (using subprocess)
     :return: None
     """
-    path_photos = os.path.join(OUTPUT_PATH, 'photos')
-    delete_directory(path_photos)
+    photos_path = os.path.join(OUTPUT_PATH, 'photos')
+    delete_directory(photos_path)
     pass
 
 
@@ -127,21 +127,16 @@ def get_random_entry(dirs_list) -> str:
     return np.random.choice(dirs_list)
 
 
-def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
+def rsync_directory(source, destination) -> None:
     """
     Select a random directory from INPUT_PATH and copy this locally to be
     picked up by the screensaver program
-    :param photo_dirs_list: a list of directory names inside remote servers's directory
+    :param photo_dirs_list: a list of directory names inside remote location's directory
                             the output from running get_remote_dirs_list
     :return: None
     """
-    app_logger.info(f'Selecting a random choice from directory list')
-    random_dir_choice = get_random_entry(photo_dirs_list)
-    app_logger.info(f'Copying {random_dir_choice} locally to ' + os.path.join(OUTPUT_PATH, 'photos'))
 
-    delete_old_screensaver_photos()
-
-    # Now run rsync
+    # run rsync
     proc = subprocess.run(["rsync",
                            # verbose
                            "-v",
@@ -159,65 +154,121 @@ def upload_new_screensaver_photos(photo_dirs_list: list) -> None:
                            # exclude files:
                            "--exclude", "*",
                            # from:
-                           os.path.join(INPUT_PATH, random_dir_choice),
+                           source,
                            # to:
-                           os.path.join(OUTPUT_PATH, 'photos')],
+                           destination],
                           stdout=subprocess.PIPE,  # required to return names of photos transferred
                           universal_newlines=True  # required to return string, not bytes-like obj
                           # stderr=subprocess.STDOUT
                           )
 
-    # Change mode of newly created directory so photos can be deleted when job runs
-    subprocess.run(["chmod", "777", os.path.join(OUTPUT_PATH, 'photos')])
-
     # Lower case output to handle cases when file extension is in caps
-    proc_stdout_lower_case = proc.stdout.lower()
+    #proc_stdout_lower_case = proc.stdout.lower()
 
     # Repeat operation while no photos exist in the randomly selected directory
-    if not ('.jpg' in proc_stdout_lower_case or '.jpeg' in proc_stdout_lower_case):
-        upload_new_screensaver_photos(photo_dirs_list)
+    #if not ('.jpg' in proc_stdout_lower_case or '.jpeg' in proc_stdout_lower_case):
+    #    upload_new_screensaver_photos(photo_dirs_list)
     pass
 
 
+def copy_directory_locally(dir, destination):
+    subprocess.check_output(['cp', '-r', dir, destination])
+    pass
+
+
+def make_directory(path):
+    subprocess.check_output(['mkdir', '-p', path])
+    pass
+
+
+def get_size_of_dir(dir):
+    return int(subprocess.check_output(['du', '-shm', dir]).split()[0].decode('utf-8'))
+
+
 def main() -> None:
-    app_logger.info('Getting photo directories list from paulito')
+
+    #TODO:
+    # check if server can be reached.
+    # check if 'photos' and 'library' exist, and are chmod777. if not create and set mode
+    # do we need / at the end of photos_path and library_path?
+    # move 2.3 to the end
+    # what if folder empty?
+    # remove strip_path_list function, not needed
+
+    photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
+
+
+    # 1) Get list of remote directories.
+    app_logger.info('Getting photo directories list from remote location')
     remote_list = get_remote_dirs_list()
-    app_logger.info('Starting upload_new_screensaver_photos')
-    upload_new_screensaver_photos(remote_list)
-    app_logger.info('Finished running screensaver.py!')
+
+    # 2) Load list of directories that have already been shown
+    # If this is the first time the script runs it will not find such a file. We then start with an empty one
+    app_logger.info('Load already shown directories')
+    try:
+        already_used = pickle.load(open("already_used.p", "rb"))
+    except:
+        already_used = []
+
+    # 2.1) Check if all remote directories have already been shown. If yes the list is reset
+    if set(remote_list).issubset(already_used):
+        already_used = []
+
+    # 2.2) Choose a random directory that has not been shown yet
+    random_dir = get_random_entry(remote_list)
+    while random_dir in already_used:
+        random_dir = get_random_entry(remote_list)
+    app_logger.info(f'Chosen directory is: {random_dir}')
+
+    # 2.3) Add chosen directory to already shown list to exclude it from future selections
+    already_used.append(random_dir)
+    pickle.dump(already_used, open("already_used.p", "wb"))
+    print(already_used)
+
+    # 3) Check if directory already exists locally
+    local_list = get_local_dirs_list('library')
+    local_equivalent = os.path.join('library', random_dir, '')
+
+    # 3.1) If yes, copy locally from lib and then try to rsync with remote location afterwards in case of changes
+    delete_old_screensaver_photos()
+    if local_equivalent in local_list:
+        app_logger.info(f'{local_equivalent} exists locally')
+        copy_directory_locally(local_equivalent, photos_path)
+        rsync_directory(random_dir, photos_path)
+        rsync_directory(random_dir, local_equivalent)
+
+        # Change mode of newly created directory so photos can be deleted when job runs
+        subprocess.run(["chmod", "777", photos_path])
+        subprocess.run(["chmod", "777", local_equivalent])
+    # 3.c) if not, rsync to photos and library
+    else:
+        app_logger.info(f'{local_equivalent} does not exists locally and is getting copied from remote')
+        rsync_directory(random_dir, photos_path)
+        #        check size of lib. if above 15GBP, delete random directory and repeat until <15GB.
+        while get_size_of_dir('library') > int(15*1024):
+            delete_directory(get_random_entry(local_list))
+
+        make_directory(local_equivalent)
+        copy_directory_locally(photos_path, local_equivalent)
+
+    print(local_list)
+    print(local_equivalent)
 
 
-    ##
-    #1 check if paulito can be reached. get dir_list. if all of dir_list in already_used, remove all from already_used list.
-    #2 choose random directory
-    #3 load already_used pickle, and check if it is in there. if yes, choose new one & repeat
-    #4 check if dir exists localy
-    #  if yes, copy locally from lib, then rsync server with lib after
-    #  if not, rysync to screensaver.
-    #        check size of lib. if above 15GBP, delete random directory and repeat until <15GB.
-    #        then copy to lib (make new dir)
     #5 add dir to already used pickle and save
     #1---> if paulito cannot be reached, choose random folder from list. if all of local in already_used, remove all from already_used list.
     # check if folder in already_used_list. if yes, repeat, until not, then copy to screensaver
-
-    local_list = get_local_dirs_list(os.path.join(OUTPUT_PATH, 'library'))
-    a = strip_path_list(local_list)
-    b = strip_path_list(remote_list)
-    print(get_random_entry(local_list))
-    print(strip_path(get_random_entry(local_list)))
-    print(set(a).issubset(b))
-
+    #a = strip_path_list(local_list)
+    #b = strip_path_list(remote_list)
+    #print(get_random_entry(local_list))
+    #print(strip_path(get_random_entry(local_list)))
     #Size stuff
-    size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'photos')]).split()[0].decode('utf-8'))
-    print("Mbytes photos:", size)
-    size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'library')]).split()[0].decode('utf-8'))
-    print("Mbytes photos:", size)
+    #size = int(subprocess.check_output(['du', '-shm', photos_path]).split()[0].decode('utf-8'))
+    #print("Mbytes photos:", size)
+    #size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'library')]).split()[0].decode('utf-8'))
+    #print("Mbytes photos:", size)
 
-    #Pickle stuff
-    already_used = pickle.load(open("already_used.p", "rb"))
-    already_used.append('test')
-    pickle.dump(already_used, open("already_used.p", "wb"))
-    ##
+
     pass
 
 
