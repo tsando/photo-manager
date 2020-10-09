@@ -15,9 +15,11 @@ INPUT_PATH = os.getenv('SCREENSAVER_INPUT_PATH')
 OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
+# SD card size in GByte. 3/4 of that will be used for library space
+SD_card_space = 32
+
 # Global variable path validation
-if INPUT_PATH[-1] != '/':
-    INPUT_PATH += '/'
+INPUT_PATH = os.path.join(INPUT_PATH, '')
 
 
 def get_remote_dirs_list() -> list:
@@ -85,16 +87,6 @@ def get_last_level_directories(photo_dirs_list) -> list:
         if counter == 1:
             photo_dirs_list_final.append(line.rstrip())
     return photo_dirs_list_final
-
-
-def delete_old_screensaver_photos() -> None:
-    """
-    Delete old photo files if the screensaver directory exists (using subprocess)
-    :return: None
-    """
-    photos_path = os.path.join(OUTPUT_PATH, 'photos')
-    delete_directory(photos_path)
-    pass
 
 
 def delete_directory(path) -> None:
@@ -196,7 +188,18 @@ def main() -> None:
     # remove strip_path_list function, not needed
 
     photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
+    library = 'library'
+    library_path = os.path.join(OUTPUT_PATH, library, '')
 
+    if not os.path.exists(photos_path):
+        make_directory(photos_path)
+        subprocess.run(["chmod", "777", photos_path])
+
+    if not os.path.exists(library_path):
+        make_directory(library_path)
+        subprocess.run(["chmod", "777", library_path])
+
+    return 0
 
     # 1) Get list of remote directories.
     app_logger.info('Getting photo directories list from remote location')
@@ -226,11 +229,11 @@ def main() -> None:
     print(already_used)
 
     # 3) Check if directory already exists locally
-    local_list = get_local_dirs_list('library')
-    local_equivalent = os.path.join('library', random_dir, '')
+    local_list = get_local_dirs_list(library_path)
+    local_equivalent = os.path.join(library_path, random_dir, '')
 
     # 3.1) If yes, copy locally from lib and then try to rsync with remote location afterwards in case of changes
-    delete_old_screensaver_photos()
+    delete_directory(photos_path)
     if local_equivalent in local_list:
         app_logger.info(f'{local_equivalent} exists locally')
         copy_directory_locally(local_equivalent, photos_path)
@@ -244,30 +247,24 @@ def main() -> None:
     else:
         app_logger.info(f'{local_equivalent} does not exists locally and is getting copied from remote')
         rsync_directory(random_dir, photos_path)
-        #        check size of lib. if above 15GBP, delete random directory and repeat until <15GB.
-        while get_size_of_dir('library') > int(15*1024):
+        # check size of library. If above limit, delete random directory and repeat until <limit
+        while get_size_of_dir(library_path) > int(SD_card_space*1024*0.75):
             delete_directory(get_random_entry(local_list))
 
         make_directory(local_equivalent)
         copy_directory_locally(photos_path, local_equivalent)
 
-    print(local_list)
-    print(local_equivalent)
-
-
-    #5 add dir to already used pickle and save
-    #1---> if paulito cannot be reached, choose random folder from list. if all of local in already_used, remove all from already_used list.
+    # 1---> if paulito cannot be reached, choose random folder from list. if all of local in already_used, remove all from already_used list.
     # check if folder in already_used_list. if yes, repeat, until not, then copy to screensaver
+
     #a = strip_path_list(local_list)
     #b = strip_path_list(remote_list)
     #print(get_random_entry(local_list))
     #print(strip_path(get_random_entry(local_list)))
-    #Size stuff
     #size = int(subprocess.check_output(['du', '-shm', photos_path]).split()[0].decode('utf-8'))
     #print("Mbytes photos:", size)
     #size = int(subprocess.check_output(['du', '-shm', os.path.join(OUTPUT_PATH, 'library')]).split()[0].decode('utf-8'))
     #print("Mbytes photos:", size)
-
 
     pass
 
