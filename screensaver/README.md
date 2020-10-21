@@ -93,7 +93,7 @@ Do a test run (in the following the path `/home/pi/photo-manager/screensaver/pho
 
 ```
 export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the RPi
-slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
+slide -t 30 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 Then, kill this process and now force the screen to stay on and run the slide app automatically by editing this file:
 
