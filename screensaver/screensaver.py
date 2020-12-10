@@ -17,7 +17,7 @@ OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
 # SD card size in GByte. 3/4 of that will be used for library space
-SD_card_space = 32
+disc_space_max_limit_gb = 32
 
 # Global variable path validation
 INPUT_PATH = os.path.join(INPUT_PATH, '')
@@ -225,9 +225,6 @@ def main() -> None:
 
 def rsync_with_remote(photos_path, library_path, already_used) -> None:
 
-    #TODO:
-    # what if folder empty? for example library/2018/12\ Mexico/GoPro  does not have any jpgs..
-
     # Get list of remote directories.
     app_logger.info('Getting photo directories list from remote location')
     remote_list = get_remote_dirs_list(INPUT_PATH, photos_path)
@@ -279,13 +276,13 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         app_logger.info('Rsync remote with library in case of any changes')
         rsync_directory(remote_path, local_equivalent)
 
-    # If not then rsync to photos and library
+    # If not then rsync to photos and copy to library
     else:
         app_logger.info(f'{local_equivalent} does not exists locally and is getting copied from remote')
         rsync_directory(remote_path, photos_path)
 
         # check size of library. If above limit, delete random directory and repeat until <limit
-        while get_size_of_dir(library_path) > int(SD_card_space*1024*0.75):
+        while get_size_of_dir(library_path) > int(disc_space_max_limit_gb*1024):
             app_logger.info('Library is too big, two random directories are getting deleted')
             delete_directory(get_random_entry(local_list))
             delete_directory(get_random_entry(local_list))
@@ -294,13 +291,21 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         make_directory(local_equivalent)
         copy_directory_locally(photos_path, local_equivalent)
 
+
+
+
     # Check if there are any jpgs in the photos directory
     files_jpg = glob.glob(os.path.join(photos_path, '*.[Jj][Pp]*[Gg]'))
     jpgs_exist = False
     if len(files_jpg) > 0:
         jpgs_exist = True
     ####### CONT HERE!
-
+    #TODO:
+    # what if folder empty? for example library/2018/12\ Mexico/GoPro  does not have any jpgs..
+    # reload main()... is the answer I think
+    # do we need to change r/w permissions to json file?
+    # # replace rsync with reg ex: '*.[Jj][Pp]*[Gg]'
+    # ping check if behind dns? fix this
     pass
 
 
