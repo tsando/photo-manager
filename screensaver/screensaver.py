@@ -17,7 +17,7 @@ OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
 # SD card size in GByte. 3/4 of that will be used for library space
-disc_space_max_limit_gb = 32
+disc_space_max_limit_gb = 20
 
 # Global variable path validation
 INPUT_PATH = os.path.join(INPUT_PATH, '')
@@ -108,10 +108,11 @@ def rsync_directory(source, destination) -> None:
                            # use special port
                            "--rsh", "ssh -p" + RSYNC_PORT,
                            # include files:
-                           "--include", "*.jpg",
-                           "--include", "*.JPG",
-                           "--include", "*.jpeg",
-                           "--include", "*.JPEG",
+                           "--include", "*.[Jj][Pp]*[Gg]",
+                           #"--include", "*.jpg",
+                           #"--include", "*.JPG",
+                           #"--include", "*.jpeg",
+                           #"--include", "*.JPEG",
                            # exclude files:
                            "--exclude", "*",
                            # from:
@@ -228,9 +229,9 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
     # Get list of remote directories.
     app_logger.info('Getting photo directories list from remote location')
     remote_list = get_remote_dirs_list(INPUT_PATH, photos_path)
-    # Check if all remote directories have already been shown. If yes the list is reset
+    # Check if all remote directories have already been shown. If yes the list trimmed down accordingly
     if set(remote_list).issubset(already_used):
-        already_used = []
+        already_used = [x for x in already_used if x not in remote_list]
 
     # Choose a random directory that has not been shown yet
     random_dir = get_random_entry(remote_list)
@@ -252,15 +253,6 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
                 'random_dir': random_dir}
     with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
         json.dump(json_dic, fp, sort_keys=True, indent=4)
-
-
-    return
-    #print("----------")
-    #print(already_used)
-    #print(local_list)
-    #local_equivalent = '/Users/paulschaack/Downloads/coding/photo-manager/screensaver/library/2020/02 Norway/'  ###
-    #remote_path = os.path.join(INPUT_PATH, '2020/02 Norway', '') ###
-    #print(local_equivalent)
 
     # If directory already exists locally then copy locally from library to photos
     # Afterwards rsync with remote location in case of changes
@@ -291,20 +283,21 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         make_directory(local_equivalent)
         copy_directory_locally(photos_path, local_equivalent)
 
-
-
-
-    # Check if there are any jpgs in the photos directory
+    # Check if there are any jpgs in the photos directory. If not, start over
+    # test with for example library/201X/12\ Mexico/GoPro, which does not have any jpgs..
     files_jpg = glob.glob(os.path.join(photos_path, '*.[Jj][Pp]*[Gg]'))
     jpgs_exist = False
     if len(files_jpg) > 0:
+        app_logger.info('There are photos in the photos directory')
         jpgs_exist = True
+    else:
+        app_logger.info('There are no photos in the photos directory, start over again')
+        rsync_with_remote(photos_path, library_path, already_used)
+
+
     ####### CONT HERE!
     #TODO:
-    # what if folder empty? for example library/2018/12\ Mexico/GoPro  does not have any jpgs..
-    # reload main()... is the answer I think
-    # do we need to change r/w permissions to json file?
-    # # replace rsync with reg ex: '*.[Jj][Pp]*[Gg]'
+    #
     # ping check if behind dns? fix this
     pass
 
