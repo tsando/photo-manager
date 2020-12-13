@@ -19,6 +19,9 @@ RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 # SD card size in GByte. 3/4 of that will be used for library space
 disc_space_max_limit_gb = 20
 
+# Define regular expression for files to be transferred
+regex_files = '*.[Jj][Pp]*[Gg]'
+
 # Global variable path validation
 INPUT_PATH = os.path.join(INPUT_PATH, '')
 
@@ -108,7 +111,7 @@ def rsync_directory(source, destination) -> None:
                            # use special port
                            "--rsh", "ssh -p" + RSYNC_PORT,
                            # include files:
-                           "--include", "*.[Jj][Pp]*[Gg]",
+                           "--include", regex_files,
                            #"--include", "*.jpg",
                            #"--include", "*.JPG",
                            #"--include", "*.jpeg",
@@ -285,7 +288,7 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
 
     # Check if there are any jpgs in the photos directory. If not, start over
     # test with for example library/201X/12\ Mexico/GoPro, which does not have any jpgs..
-    files_jpg = glob.glob(os.path.join(photos_path, '*.[Jj][Pp]*[Gg]'))
+    files_jpg = glob.glob(os.path.join(photos_path, regex_files))
     jpgs_exist = False
     if len(files_jpg) > 0:
         app_logger.info('There are photos in the photos directory')
@@ -294,11 +297,11 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         app_logger.info('There are no photos in the photos directory, start over again')
         rsync_with_remote(photos_path, library_path, already_used)
 
-
-    ####### CONT HERE!
     #TODO:
-    #
+    # test loop for no photos transferred
+    # test max disc space condition
     # ping check if behind dns? fix this
+
     pass
 
 
