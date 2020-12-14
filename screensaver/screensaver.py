@@ -77,6 +77,10 @@ def get_local_dirs_list(path) -> list:
     return get_last_level_directories(photo_dirs_list)
 
 
+def trim_path_prefix(path_list, prefix) -> list:
+    return [x.split(prefix)[1] for x in path_list]
+
+
 def get_last_level_directories(photo_dirs_list) -> list:
     """
     Only select the last level of subdirectories, and ignore any higher level directories
@@ -203,7 +207,6 @@ def get_already_used_list():
 
 
 def main() -> None:
-
     # Path definitions
     server_address = INPUT_PATH.split('@')[1].split(':')[0]
     photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
@@ -215,15 +218,52 @@ def main() -> None:
 
     # Check if remote server is available
     remote_available = is_remote_available(server_address)
-    remote_available = True   ######   HACK
+    remote_available = False   ######   HACK
     # If the server is available continue with accessing the server
     if remote_available:
         rsync_with_remote(photos_path, library_path, already_used)
     # If not then use photos from the local library only:
     else:
-        # rsync_with_local
-        # ->getrandom from local library
-        pass
+        app_logger.info('Remote server not available, selecting a random path from library')
+        select_from_local(photos_path, library_path, already_used)
+
+    #TODO:
+    # test loop for no photos transferred
+    # test max disc space condition
+    # ping check if behind dns? fix this
+    pass
+
+
+def select_from_local(photos_path, library_path, already_used) -> None:
+    # Get local entries in library
+    local_list = get_local_dirs_list(library_path)
+    local_list = trim_path_prefix(local_list, library_path)
+
+    # Check if all directories have already been shown. If yes the list is trimmed down accordingly
+    if set(local_list).issubset(already_used):
+        already_used = [x for x in already_used if x not in local_list]
+
+    # Choose a random directory that has not been shown yet
+    random_dir = get_random_entry(local_list)
+    while random_dir in already_used:
+        random_dir = get_random_entry(local_list)
+    # Add chosen directory to already shown list to exclude it from future selections
+    already_used.append(random_dir)
+    app_logger.info(f'Chosen directory is: {random_dir}')
+
+    # Build local path and copy to photos
+    local_equivalent = os.path.join(library_path, random_dir, '')
+    app_logger.info('Copy from library to photos directory')
+    copy_directory_locally(local_equivalent, photos_path)
+
+    # Dump data to json
+    json_dic = {'already_used': already_used,
+                'remote_list': [],
+                'local_list': local_list,
+                'random_dir': random_dir}
+    with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
+        json.dump(json_dic, fp, sort_keys=True, indent=4)
+
     pass
 
 
@@ -232,7 +272,7 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
     # Get list of remote directories.
     app_logger.info('Getting photo directories list from remote location')
     remote_list = get_remote_dirs_list(INPUT_PATH, photos_path)
-    # Check if all remote directories have already been shown. If yes the list trimmed down accordingly
+    # Check if all remote directories have already been shown. If yes the list is trimmed down accordingly
     if set(remote_list).issubset(already_used):
         already_used = [x for x in already_used if x not in remote_list]
 
@@ -296,11 +336,6 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
     else:
         app_logger.info('There are no photos in the photos directory, start over again')
         rsync_with_remote(photos_path, library_path, already_used)
-
-    #TODO:
-    # test loop for no photos transferred
-    # test max disc space condition
-    # ping check if behind dns? fix this
 
     pass
 
