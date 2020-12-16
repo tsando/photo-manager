@@ -228,37 +228,6 @@ def get_already_used_list():
     return already_used
 
 
-def main() -> None:
-    # Path definitions
-    server_address = INPUT_PATH.split('@')[1].split(':')[0]
-    photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
-    library_path = os.path.join(OUTPUT_PATH, 'library', '')
-    # Setup of all paths if not existent
-    setup_paths(photos_path, library_path)
-    # Load already shown albums
-    already_used = get_already_used_list()
-    # Check if remote server is available
-    remote_available = is_remote_available()
-
-    ### HACK
-    remote_available = False
-    ###
-
-    # If the server is available continue with accessing the server
-    if remote_available:
-        app_logger.info('Remote server available')
-        rsync_with_remote(photos_path, library_path, already_used)
-    # If not then use photos from the local library only:
-    else:
-        app_logger.info('Remote server not available, selecting a random path from library')
-        select_from_local(photos_path, library_path, already_used)
-
-    #TODO:
-    # test loop for no photos transferred
-    # test max disc space condition
-    pass
-
-
 def select_from_local(photos_path, library_path, already_used) -> None:
     # Get local entries in library
     local_list = get_local_dirs_list(library_path)
@@ -289,11 +258,18 @@ def select_from_local(photos_path, library_path, already_used) -> None:
     with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
         json.dump(json_dic, fp, sort_keys=True, indent=4)
 
+    # Check if there are any jpgs in the photos directory. If not, start over
+    # test with for example library/201X/12\ Mexico/GoPro, which does not have any jpgs..
+    files_jpg = glob.glob(os.path.join(photos_path, regex_files))
+    if len(files_jpg) > 0:
+        app_logger.info('There are photos in the photos directory')
+    else:
+        app_logger.info('There are no photos in the photos directory, start over again')
+        select_from_local(photos_path, library_path, already_used)
     pass
 
 
 def rsync_with_remote(photos_path, library_path, already_used) -> None:
-
     # Get list of remote directories.
     app_logger.info('Getting photo directories list from remote location')
     remote_list = get_remote_dirs_list(INPUT_PATH, photos_path)
@@ -313,14 +289,6 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
     # Get local entries in library
     local_list = get_local_dirs_list(library_path)
     local_equivalent = os.path.join(library_path, random_dir, '')
-
-    # Dump data to json
-    json_dic = {'already_used': already_used,
-                'remote_list': remote_list,
-                'local_list': local_list,
-                'random_dir': random_dir}
-    with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
-        json.dump(json_dic, fp, sort_keys=True, indent=4)
 
     # If directory already exists locally then copy locally from library to photos
     # Afterwards rsync with remote location in case of changes
@@ -351,17 +319,45 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         make_directory(local_equivalent)
         copy_directory_locally(photos_path, local_equivalent)
 
+    # Dump data to json
+    json_dic = {'already_used': already_used,
+                'remote_list': remote_list,
+                'local_list': local_list,
+                'random_dir': random_dir}
+    with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
+        json.dump(json_dic, fp, sort_keys=True, indent=4)
+
     # Check if there are any jpgs in the photos directory. If not, start over
-    # test with for example library/201X/12\ Mexico/GoPro, which does not have any jpgs..
     files_jpg = glob.glob(os.path.join(photos_path, regex_files))
-    jpgs_exist = False
     if len(files_jpg) > 0:
         app_logger.info('There are photos in the photos directory')
-        jpgs_exist = True
     else:
         app_logger.info('There are no photos in the photos directory, start over again')
         rsync_with_remote(photos_path, library_path, already_used)
 
+    pass
+
+
+def main() -> None:
+    # Path definitions
+    server_address = INPUT_PATH.split('@')[1].split(':')[0]
+    photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
+    library_path = os.path.join(OUTPUT_PATH, 'library', '')
+    # Setup of all paths if not existent
+    setup_paths(photos_path, library_path)
+    # Load already shown albums
+    already_used = get_already_used_list()
+    # Check if remote server is available
+    remote_available = is_remote_available()
+
+    # If the server is available continue with accessing the server
+    if remote_available:
+        app_logger.info('Remote server available')
+        rsync_with_remote(photos_path, library_path, already_used)
+    # If not then use photos from the local library only:
+    else:
+        app_logger.info('Remote server not available, selecting a random path from library')
+        select_from_local(photos_path, library_path, already_used)
     pass
 
 
