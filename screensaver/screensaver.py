@@ -186,7 +186,7 @@ def is_remote_available():
                           stderr=subprocess.PIPE
                           )
     output_err = str(proc.stderr)
-    #print(output_err)
+    # print(output_err)
     if "Could not resolve hostname" in output_err:
         return False
     elif "Permission denied" in output_err:
@@ -239,6 +239,10 @@ def main() -> None:
     already_used = get_already_used_list()
     # Check if remote server is available
     remote_available = is_remote_available()
+
+    ### HACK
+    remote_available = False
+    ###
 
     # If the server is available continue with accessing the server
     if remote_available:
