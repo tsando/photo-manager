@@ -245,11 +245,6 @@ def select_from_local(photos_path, library_path, already_used) -> None:
     already_used.append(random_dir)
     app_logger.info(f'Chosen directory is: {random_dir}')
 
-    # Build local path and copy to photos
-    local_equivalent = os.path.join(library_path, random_dir, '')
-    app_logger.info('Copy from library to photos directory')
-    copy_directory_locally(local_equivalent, photos_path)
-
     # Dump data to json
     json_dic = {'already_used': already_used,
                 'remote_list': [],
@@ -257,6 +252,11 @@ def select_from_local(photos_path, library_path, already_used) -> None:
                 'random_dir': random_dir}
     with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
         json.dump(json_dic, fp, sort_keys=True, indent=4)
+
+    # Build local path and copy to photos
+    local_equivalent = os.path.join(library_path, random_dir, '')
+    app_logger.info('Copy from library to photos directory')
+    copy_directory_locally(local_equivalent, photos_path)
 
     # Check if there are any jpgs in the photos directory. If not, start over
     # test with for example library/201X/12\ Mexico/GoPro, which does not have any jpgs..
@@ -290,6 +290,14 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
     local_list = get_local_dirs_list(library_path)
     local_equivalent = os.path.join(library_path, random_dir, '')
 
+    # Dump data to json
+    json_dic = {'already_used': already_used,
+                'remote_list': remote_list,
+                'local_list': local_list,
+                'random_dir': random_dir}
+    with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
+        json.dump(json_dic, fp, sort_keys=True, indent=4)
+
     # If directory already exists locally then copy locally from library to photos
     # Afterwards rsync with remote location in case of changes
     if local_equivalent in local_list:
@@ -318,14 +326,6 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
         app_logger.info('Copy photos to local library for future uses')
         make_directory(local_equivalent)
         copy_directory_locally(photos_path, local_equivalent)
-
-    # Dump data to json
-    json_dic = {'already_used': already_used,
-                'remote_list': remote_list,
-                'local_list': local_list,
-                'random_dir': random_dir}
-    with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
-        json.dump(json_dic, fp, sort_keys=True, indent=4)
 
     # Check if there are any jpgs in the photos directory. If not, start over
     files_jpg = glob.glob(os.path.join(photos_path, regex_files))
