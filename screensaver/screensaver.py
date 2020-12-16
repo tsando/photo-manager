@@ -131,6 +131,7 @@ def rsync_directory(source, destination) -> None:
 
 
 def copy_directory_locally(source, destination):
+    source = os.path.join(source, '', '.')
     subprocess.run(['cp', '-r', source, destination], stdout=subprocess.PIPE)
     pass
 
