@@ -116,10 +116,6 @@ def rsync_directory(source, destination) -> None:
                            "--rsh", "ssh -p" + RSYNC_PORT,
                            # include files:
                            "--include", regex_files,
-                           #"--include", "*.jpg",
-                           #"--include", "*.JPG",
-                           #"--include", "*.jpeg",
-                           #"--include", "*.JPEG",
                            # exclude files:
                            "--exclude", "*",
                            # from:
@@ -169,12 +165,38 @@ def get_size_of_dir(path):
     return size
 
 
-def is_remote_available(ip):
-    response = subprocess.run(['ping', '-c 1', '-t 1', ip], stdout=subprocess.PIPE).returncode
-    if response == 0:
-        return True
-    else:
+def is_remote_available():
+    proc = subprocess.run(["rsync",
+                           # verbose + dry-run
+                           "-vn",
+                           # archive
+                           "-a",
+                           # use special port
+                           "--rsh", "ssh -p" + RSYNC_PORT,
+                           # include directories"
+                           "--include", "*/",
+                           # exclude files:
+                           "--exclude", "*",
+                           # from:
+                           INPUT_PATH,
+                           # to:
+                           "."
+                           ],
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE
+                          )
+    output_err = str(proc.stderr)
+    #print(output_err)
+    if "Could not resolve hostname" in output_err:
         return False
+    elif "Permission denied" in output_err:
+        return False
+    elif "Connection closed by" in output_err:
+        return False
+    elif "connection unexpectedly closed" in output_err:
+        return False
+    else:
+        return True
 
 
 def get_random_entry(dirs_list) -> str:
@@ -215,12 +237,12 @@ def main() -> None:
     setup_paths(photos_path, library_path)
     # Load already shown albums
     already_used = get_already_used_list()
-
     # Check if remote server is available
-    remote_available = is_remote_available(server_address)
-    remote_available = False   ######   HACK
+    remote_available = is_remote_available()
+
     # If the server is available continue with accessing the server
     if remote_available:
+        app_logger.info('Remote server available')
         rsync_with_remote(photos_path, library_path, already_used)
     # If not then use photos from the local library only:
     else:
@@ -230,7 +252,6 @@ def main() -> None:
     #TODO:
     # test loop for no photos transferred
     # test max disc space condition
-    # ping check if behind dns? fix this
     pass
 
 
