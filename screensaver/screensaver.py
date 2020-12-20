@@ -341,7 +341,6 @@ def rsync_with_remote(photos_path, library_path, already_used) -> None:
 
 def main() -> None:
     # Path definitions
-    server_address = INPUT_PATH.split('@')[1].split(':')[0]
     photos_path = os.path.join(OUTPUT_PATH, 'photos', '')
     library_path = os.path.join(OUTPUT_PATH, 'library', '')
     # Setup of all paths if not existent
