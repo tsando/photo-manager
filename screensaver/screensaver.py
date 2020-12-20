@@ -248,7 +248,7 @@ def select_from_local(photos_path, library_path, already_used) -> None:
 
     # Dump data to json
     json_dic = {'already_used': already_used,
-                'remote_list': [],
+                'remote_list': 'not available',
                 'local_list': local_list,
                 'random_dir': random_dir}
     with open(os.path.join(OUTPUT_PATH, 'already_used.json'), 'w') as fp:
