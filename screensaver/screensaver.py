@@ -170,8 +170,6 @@ def is_remote_available():
     proc = subprocess.run(["rsync",
                            # verbose + dry-run
                            "-vn",
-                           # archive
-                           "-a",
                            # use special port
                            "--rsh", "ssh -p" + RSYNC_PORT,
                            # include directories"
