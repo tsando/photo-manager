@@ -16,7 +16,7 @@ INPUT_PATH = os.getenv('SCREENSAVER_INPUT_PATH')
 OUTPUT_PATH = os.getenv('SCREENSAVER_OUTPUT_PATH')
 RSYNC_PORT = os.getenv('SCREENSAVER_RSYNC_PORT')
 
-# SD card size in GByte. 3/4 of that will be used for library space
+# Maximum size limit of local library folder in GByte
 disc_space_max_limit_gb = 20
 
 # Define regular expression for files to be transferred
