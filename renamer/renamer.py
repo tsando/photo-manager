@@ -32,7 +32,7 @@ def validate_user_inputs():
 
 def rename_photos(_dir, name_tag):
     #  consider only image and movie files
-    extensions = ['jpg', 'jpeg', 'mov']
+    extensions = ['jpg', 'jpeg', 'mov', 'mp4']
     time_tag_list = []
     counter = 2  # for the rare case when 2 or more photos have the same timestamp (see below)
     for fn in os.listdir(_dir):
