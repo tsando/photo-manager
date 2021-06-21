@@ -2,31 +2,28 @@
 
 import os
 import datetime
+import argparse
+import sys
 
 
 def validate_user_inputs():
-    """
-        Checks user has provided a valid directory path
-    :return:
-        _dir: the validated directory which the user provided
-        name_tag: the name tag provided by the user to rename the files
-    """
-    _dir = None
-    while True:
-        try:
-            _dir = str(input("Enter the full path to the photo directory:\n"))
-            if '/' not in _dir or ' ' in _dir:
-                raise ValueError
-            break
-        except ValueError:
-            print("-> ERROR: That is not a valid directory. Example valid input: \
-            '/Users/username/Pictures/mydirectory'")
-        except FileNotFoundError:
-            print("-> ERROR: That directory doesn't exist")
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('path', metavar='path', type=str,
+                        help='path to photo directory')
+    parser.add_argument('name', metavar='name', type=str,
+                        help='common name to add to photo files')
+    args = parser.parse_args()
+    args_values = vars(args)
 
-    name_tag = str(input('Enter a name tag for all the photos and video files:\n'))
-    name_tag = name_tag.replace(' ', '_')
-    print('-> INFO: Modified name tag to:\t{}'.format(name_tag))
+    name_tag = args_values['name']
+    cwd = os.getcwd()
+    _dir = os.path.join(cwd, args_values['path'])
+
+    try:
+        fList = os.listdir(_dir)
+    except OSError:
+        sys.exit("-> ERROR: That directory doesn't exist")
+
     return _dir, name_tag
 
 
