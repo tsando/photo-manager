@@ -9,8 +9,8 @@ a similar one in an RPi.
 
 The script `screensaver.py` requires `python 3.7` with `numpy` and setting 3 environment variables:
 
-1. `SCREENSAVER_INPUT_PATH` (The path to where the photos directories are located. Should end with `/`)
-2. `SCREENSAVER_OUTPUT_PATH` (The path to where to upload the photos. Shouldn't end with `/`)
+1. `SCREENSAVER_INPUT_PATH` (The path where the photos directories are located on the remote-side)
+2. `SCREENSAVER_OUTPUT_PATH` (The path to where the photos are getting uploaded. Two sub-folders, `photos` and `library`, will be created in here)
 3. `SCREENSAVER_RSYNC_PORT` (The port over which ssh is being used, usually 22)
 
 Then, you can run it with:
@@ -31,6 +31,8 @@ export SCREENSAVER_RSYNC_PORT="XXX"
 /usr/bin/python3.7 /home/pi/photo-manager/screensaver/screensaver.py
 ```
 Make the script executable with `chmod +x /home/pi/photo-manager/screensaver/run_screensaver.sh`. 
+Also ensure that you have a new version of `rsync` installed (at least 3.1.3). 
+Instructions for Mac (with Homebrew installed) are [here](https://bayton.org/2018/07/how-to-update-rsync-on-mac-os-high-sierra/).
 
 ## Cron job
 
@@ -87,11 +89,11 @@ make
 sudo make install
 ```
 
-Do a test run (in the following the path `/home/pi/photo-manager/screensaver/photos/` was created, and also used as `SCREENSAVER_OUTPUT_PATH`):
+Do a test run (photos are in the following the path `/home/pi/photo-manager/screensaver/photos/`):
 
 ```
 export DISPLAY=:0  # set the DISPLAY variable to start the slideshow on the display attached to the RPi
-slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
+slide -t 30 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 Then, kill this process and now force the screen to stay on and run the slide app automatically by editing this file:
 
@@ -110,10 +112,10 @@ lxpanel --profile LXDE-pi
 @xset s noblank
 @xset s off
 @xset -dpms
-@slide -p -t 60 -o 200 -p /home/pi/photo-manager/screensaver/photos/
+@slide -t 30 -o 200 -p /home/pi/photo-manager/screensaver/photos/
 ```
 
-The option `-t 60` determines how frequent the slideshow changes photos in seconds. Feel free to adjust. 
+The option `-t 30` determines how frequent the slideshow changes photos in seconds. Feel free to adjust. 
 
 ## Running the python script
 
